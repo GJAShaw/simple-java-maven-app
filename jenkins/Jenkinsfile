@@ -1,29 +1,24 @@
 pipeline {
-    agent {
-        docker {
-            image 'maven:3-alpine'
-            args '-v /root/.m2:/root/.m2'
-        }
-    }
+    agent any
     stages {
-        stage('Build') {
+        stage('look-in-nexus-rm') {
             steps {
-                sh 'mvn -B -DskipTests clean package'
-            }
-        }
-        stage('Test') {
-            steps {
-                sh 'mvn test'
-            }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
-                }
-            }
-        }
-        stage('Deliver') {
-            steps {
-                sh './jenkins/scripts/deliver.sh'
+            
+                sh '''
+                    export CURL_STDERR=curl_stderr
+                    export NEXUS_LOC='http://cthulhu:8081'
+                    export NEXUS_REPO='my-app-snapshots'
+                    export NEXUS_USER=deployer
+                    export NEXUS_PASSWORD=deployer
+                    export PRINT_FIRST_ID_AWK=jenkins/scripts/print_first_id.awk
+                    export PRINT_HTTP_STATUS_AWK=jenkins/scripts/print_HTTP_status.awk
+                    
+                    export ID=$(curl -v -X GET "${NEXUS_LOC}/service/rest/v1/components?repository=${NEXUS_REPO}" \
+                        -H  "accept: application/json" 2> ${CURL_STDERR} | awk -f ${PRINT_FIRST_ID_AWK})
+                    
+                    awk -f ${PRINT_HTTP_STATUS_AWK} < ${CURL_STDERR}
+                    echo "id = ${ID}"
+                '''
             }
         }
     }
