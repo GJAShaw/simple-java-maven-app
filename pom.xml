@@ -7,6 +7,20 @@
   <version>1.0-SNAPSHOT</version>
   <name>my-app</name>
   <url>http://maven.apache.org</url>
+
+	<distributionManagement>
+	    <repository>
+	        <id>cthulhu-releases</id>
+	        <name>Cthulhu Releases</name>
+	        <url>http://cthulhu:8081/repository/my-app-releases</url>
+	    </repository>
+	    <snapshotRepository>
+	        <id>cthulhu-snapshots</id>
+	        <name>Cthulhu Snapshots</name>
+	        <url>http://cthulhu:8081/repository/my-app-snapshots</url>
+	    </snapshotRepository>
+	</distributionManagement>
+	
   <dependencies>
     <dependency>
       <groupId>junit</groupId>
